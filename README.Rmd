@@ -18,13 +18,18 @@ library(ours)
 library(ggplot2)
 library(gridExtra)
 library(ggrepel)
+library(corrplot)
 ```
+
+# The gist
 
 # Background
 
 [Come back to this. So I think this should break into three analyses. This one is the first/primary:
 CAs of the frequencies per page. then the 0/1 and relate it to graphs, 
 then MCD (which connects back to bivariate & row/column flip)]
+
+Explain the two data sets and the motivation
 
 # Explanation of the directory structure
 
@@ -38,8 +43,6 @@ For processing of the text, I did little additional work on top of two analyses 
 In principle, these analyses are virtually the same as what we did for the NeuroSynth database (see [our paper on correspondence analysis of manuscript-by-terms in the NeuroSynth database](https://www.biorxiv.org/content/10.1101/157826v3) and [fahd09/neurosynth_semantic_map](https://github.com/fahd09/neurosynth_semantic_map)).
 
 # Correspondence analyses of the Mueller Report
-
-
 
 ```{r load_data_run_cas, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -116,12 +119,16 @@ lemmas_counts_ca_scree_plot <- ggplot(lemmas_counts_ca_scree, aes(factor(comps),
 #   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
 
 # grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_scree_plot, lemmas_ca_scree_plot, nrow = 2)
+
+```
+
+```{r vis_scree,echo=FALSE, warning=FALSE, message=FALSE, fig.height=6, fig.width=12}
 grid.arrange(words_counts_ca_scree_plot, lemmas_counts_ca_scree_plot, nrow = 1)
 ```
 
 
 
-```{r visualize_components}
+```{r component_vis_prep, echo=FALSE, warning=FALSE, message=FALSE}
 
 words_counts_ca_comps12_fi_df <- data.frame(
   COMP1 = words_counts_ca$ExPosition.Data$fi[,1],
@@ -133,65 +140,32 @@ words_counts_ca_comps12_fj_df <- data.frame(
   COMP2 = words_counts_ca$ExPosition.Data$fj[,2]
 )
 words_counts_xlims <- c(
-  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP1)),
-  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP1))
+  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fj_df$COMP1)),
+  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fj_df$COMP1))
 )
 words_counts_ylims <- c(
-  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP2)),
-  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP2))
+  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fj_df$COMP2)),
+  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fj_df$COMP2))
 )
-
-# words_ca_comps12_fi_df <- data.frame(
-#   COMP1 = words_ca$ExPosition.Data$fi[,1],
-#   COMP2 = words_ca$ExPosition.Data$fi[,2]
-#   )
-# words_ca_comps12_fj_df <- data.frame(  
-#   COMP1 = words_ca$ExPosition.Data$fj[,1],
-#   COMP2 = words_ca$ExPosition.Data$fj[,2]
-# )
-# words_lims <- max(max(abs(words_ca_comps12_fi_df)),max(abs(words_ca_comps12_fj_df)))
 
 lemmas_counts_ca_comps12_fi_df <- data.frame(
   COMP1 = lemmas_counts_ca$ExPosition.Data$fi[,1],
-  COMP2 = lemmas_counts_ca$ExPosition.Data$fi[,2]
+  COMP2 = lemmas_counts_ca$ExPosition.Data$fi[,2],
+  PAGE_NUMBER = as.numeric(rownames(lemmas_counts_ca$ExPosition.Data$fi))
 )
 lemmas_counts_ca_comps12_fj_df <- data.frame(
   COMP1 = lemmas_counts_ca$ExPosition.Data$fj[,1],
   COMP2 = lemmas_counts_ca$ExPosition.Data$fj[,2]
 )
-lemmas_counts_lims <- max(max(abs(lemmas_counts_ca_comps12_fi_df)),max(abs(lemmas_counts_ca_comps12_fj_df)))
+lemmas_counts_xlims <- c(
+  min(c(0.01,lemmas_counts_ca_comps12_fi_df$COMP1,lemmas_counts_ca_comps12_fj_df$COMP1)),
+  max(c(-0.01,lemmas_counts_ca_comps12_fi_df$COMP1,lemmas_counts_ca_comps12_fj_df$COMP1))
+)
+lemmas_counts_ylims <- c(
+  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,lemmas_counts_ca_comps12_fj_df$COMP2)),
+  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,lemmas_counts_ca_comps12_fj_df$COMP2))
+)
 
-# lemmas_ca_comps12_fi_df <- data.frame(
-#   COMP1 = lemmas_ca$ExPosition.Data$fi[,1],
-#   COMP2 = lemmas_ca$ExPosition.Data$fi[,2]
-# )
-# lemmas_ca_comps12_fj_df <- data.frame(
-#   COMP1 = lemmas_ca$ExPosition.Data$fj[,1],
-#   COMP2 = lemmas_ca$ExPosition.Data$fj[,2]
-# )
-# lemmas_lims <- max(max(abs(lemmas_ca_comps12_fi_df)),max(abs(lemmas_ca_comps12_fj_df)))
-
-
-## I should color this by a gradient...
-# words_counts.pages_component_map <- ggplot(words_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fi_df))) +
-#   geom_hline(yintercept = 0, color = "black") +
-#   geom_vline(xintercept = 0, color="black") +
-#   geom_point(color="black",fill="mediumorchid4", alpha=.7, shape=21) +
-#   geom_text(aes(label=rownames(words_counts_ca_comps12_fi_df)),hjust=0, vjust=0, color="mediumorchid4",alpha=.7) +
-#   # geom_text_repel(box.padding = .01, point.padding = .01) +
-#   xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
-#   ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
-#   xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
-#   ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
-#   ggtitle("Pages x Words. Component Map of Pages.") +
-#   theme(axis.line = element_blank(),
-#     panel.border = element_blank(),
-#     axis.text.x = element_blank(),
-#     axis.text.y = element_blank(),
-#     axis.ticks = element_blank(), 
-#     panel.grid.major = element_blank(), 
-#     panel.grid.minor = element_blank(), 
-#     panel.background = element_blank())
 
 
 words_counts.pages_component_map <- 
@@ -200,8 +174,6 @@ words_counts.pages_component_map <-
   geom_vline(xintercept = 0, color="black") +
   geom_point() +
   scale_color_gradient(low="blue", high="red") +
-  # geom_text(aes(label=rownames(words_counts_ca_comps12_fi_df)),hjust=0, vjust=0, color="mediumorchid4",alpha=.7) +
-  # geom_text_repel(box.padding = .01, point.padding = .01) +
   xlim(words_counts_xlims[1] * 1.1, words_counts_xlims[2] * 1.1) +
   ylim(words_counts_ylims[1] * 1.1, words_counts_ylims[2] * 1.1) +
   xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
@@ -221,9 +193,8 @@ words_counts.words_component_map <- ggplot(words_counts_ca_comps12_fj_df, aes(CO
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color="black") +
   geom_point(color="black",fill="olivedrab3", alpha=.7, shape=21) +
-  # geom_text_repel(box.padding = .01, point.padding = .01) +
-  xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
-  ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+  xlim(words_counts_xlims[1] * 1.1, words_counts_xlims[2] * 1.1) +
+  ylim(words_counts_ylims[1] * 1.1, words_counts_ylims[2] * 1.1) +
   xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
   ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
   ggtitle("Pages x Words. Component Map of Words.") +
@@ -237,13 +208,13 @@ words_counts.words_component_map <- ggplot(words_counts_ca_comps12_fj_df, aes(CO
     panel.background = element_blank())
 
 
-lemmas_counts.pages_component_map <- ggplot(lemmas_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(lemmas_counts_ca_comps12_fi_df))) +
+lemmas_counts.pages_component_map <- ggplot(lemmas_counts_ca_comps12_fi_df, aes(COMP1, COMP2, color=PAGE_NUMBER)) +
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color="black") +
-  geom_point(color="mediumorchid4") +
-  # geom_text_repel(box.padding = .01, point.padding = .01) +
-  xlim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
-  ylim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  geom_point() +
+  scale_color_gradient(low="blue", high="red") +
+  xlim(lemmas_counts_xlims[1] * 1.1, lemmas_counts_xlims[2] * 1.1) +
+  ylim(lemmas_counts_ylims[1] * 1.1, lemmas_counts_ylims[2] * 1.1) +
   xlab(paste0("Component 1. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
   ylab(paste0("Component 2. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
   ggtitle("Pages x Lemmas. Component Map of Pages") +
@@ -260,10 +231,9 @@ lemmas_counts.pages_component_map <- ggplot(lemmas_counts_ca_comps12_fi_df, aes(
 lemmas_counts.lemmas_component_map <- ggplot(lemmas_counts_ca_comps12_fj_df, aes(COMP1, COMP2, label=rownames(lemmas_counts_ca_comps12_fj_df))) +
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color="black") +
-  geom_point(color="olivedrab3") +
-  # geom_text_repel(box.padding = .01, point.padding = .01) +
-  xlim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
-  ylim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  geom_point(color="black",fill="olivedrab3", alpha=.7, shape=21) + 
+  xlim(lemmas_counts_xlims[1] * 1.1, lemmas_counts_xlims[2] * 1.1) +
+  ylim(lemmas_counts_ylims[1] * 1.1, lemmas_counts_ylims[2] * 1.1) +
   xlab(paste0("Component 1. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
   ylab(paste0("Component 2. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
   ggtitle("Pages x Lemmas Component Map of Lemmas.") +
@@ -277,16 +247,28 @@ lemmas_counts.lemmas_component_map <- ggplot(lemmas_counts_ca_comps12_fj_df, aes
     panel.background = element_blank())
 
 
+```
+
+```{r vis_components, echo=FALSE, warning=FALSE, message=FALSE, fig.width=12, fig.height=12}
 grid.arrange(words_counts.pages_component_map, words_counts.words_component_map,
              lemmas_counts.pages_component_map, lemmas_counts.lemmas_component_map,
              nrow=2)
 ```
 
+Set up motivation
+```{r vis_corrplot, echo=FALSE, warning=FALSE, message=FALSE, fig.width=8, fig.height=8}
 
-```{r comparisons}
-
-## corrplots or similar heatmaps?
-
+common.pages <- intersect(rownames(lemmas_counts_ca$ExPosition.Data$fi),rownames(words_counts_ca$ExPosition.Data$fi))
+corrplot(cor(words_counts_ca$ExPosition.Data$fi[common.pages,],lemmas_counts_ca$ExPosition.Data$fi[common.pages, ])[1:20,1:20]^2,cl.lim=c(0,1))
 
 ```
 
+Explanation
+
+
+# Conclusions & More
+What we can conclude from this
+The multiple directions we can go from this:
+  (1) Methodologically
+  (2) Interpretting
+    a lot to unpack from these results if one so chooses.
