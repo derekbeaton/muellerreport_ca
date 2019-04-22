@@ -1,6 +1,12 @@
 Correspondence analyses of the Mueller Report
 ================
 
+# Background
+
+SOmething
+
+# Explanation of the directory structure
+
 # Cleaning and preprocessing
 
 For processing of the text, I did little additional work on top of two
@@ -23,6 +29,11 @@ database](https://www.biorxiv.org/content/10.1101/157826v3) and
 
 # Correspondence analyses of the Mueller Report
 
-A home for some correspondence analysis (CA) of the Mueller Report.
+Scree plot stolen from [Matt
+Kmiecik](https://mattkmiecik.com/post-Exploring-11-Years-of-Chicago-Blackhawks-Data-using-Principal-Components-Analysis.html).
 
-Updates forthcoming.
+![](README_files/figure-gfm/summaries_diagnoistics-1.png)<!-- -->
+
+``` r
+## corrplots or similar heatmaps?
+```

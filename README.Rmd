@@ -7,7 +7,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r packages}
+```{r packages, echo=FALSE, warning=FALSE, message=FALSE}
 library(ExPosition)
   # if needed.
 # devtools::install_github("derekbeaton/GSVD")
@@ -16,6 +16,7 @@ library(GSVD)
 library(ours)
 
 library(ggplot2)
+library(gridExtra)
 ```
 
 # Background
@@ -37,27 +38,79 @@ In principle, these analyses are virtually the same as what we did for the Neuro
 
 
 
-```{r load_data_run_cas}
+```{r load_data_run_cas, echo=FALSE, warning=FALSE, message=FALSE}
 
-page_by_word_counts.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_word_counts.matrix_for_analyses.csv"))
-page_by_word.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_word.matrix_for_analyses.csv"))
+page_by_word_counts.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_word_counts.matrix_for_analyses.csv"), row.names = 1)
+page_by_word.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_word.matrix_for_analyses.csv"), row.names = 1)
 
-page_by_lemma_counts.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_lemma_counts.matrix_for_analyses.csv"))
-page_by_lemma.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_lemma.matrix_for_analyses.csv"))
+page_by_lemma_counts.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_lemma_counts.matrix_for_analyses.csv"), row.names = 1)
+page_by_lemma.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_lemma.matrix_for_analyses.csv"), row.names = 1)
 
 words_counts_ca <- epCA(page_by_word_counts.matrix_for_analyses, graphs=F)
 words_ca <- epCA(page_by_word.matrix_for_analyses, graphs=F)
 
-lemmas_counts_ca <- epCA(page_by_word_counts.matrix_for_analyses, graphs=F)
-lemmas_ca <- epCA(page_by_word.matrix_for_analyses, graphs=F)
+lemmas_counts_ca <- epCA(page_by_lemma_counts.matrix_for_analyses, graphs=F)
+lemmas_ca <- epCA(page_by_lemma.matrix_for_analyses, graphs=F)
 
 ```
 
 
-```{r summaries_diagnoistics}
+Scree plot stolen from [Matt Kmiecik](https://mattkmiecik.com/post-Exploring-11-Years-of-Chicago-Blackhawks-Data-using-Principal-Components-Analysis.html).
+
+```{r summaries_diagnoistics, echo=FALSE, warning=FALSE, message=FALSE}
+
+words_counts_ca_scree <- data.frame(eigs = words_counts_ca$ExPosition.Data$eigs,
+                perc_explained = words_counts_ca$ExPosition.Data$t,
+                comps = 1:length(words_counts_ca$ExPosition.Data$eigs)
+                )
+
+words_ca_scree <- data.frame(eigs = words_ca$ExPosition.Data$eigs,
+                perc_explained = words_ca$ExPosition.Data$t,
+                comps = 1:length(words_ca$ExPosition.Data$eigs)
+                )
+
+lemmas_counts_ca_scree <- data.frame(eigs = lemmas_counts_ca$ExPosition.Data$eigs,
+                perc_explained = lemmas_counts_ca$ExPosition.Data$t,
+                comps = 1:length(lemmas_counts_ca$ExPosition.Data$eigs)
+                )
+
+lemmas_ca_scree <- data.frame(eigs = lemmas_ca$ExPosition.Data$eigs,
+                perc_explained = lemmas_ca$ExPosition.Data$t,
+                comps = 1:length(lemmas_ca$ExPosition.Data$eigs)
+                )
 
 
+words_counts_ca_scree_plot <- ggplot(words_counts_ca_scree, aes(factor(comps), perc_explained)) +
+  geom_point() +
+  geom_path(aes(group = 1)) +
+  labs(x = "Components", y = "Explained Variance (%)") +
+  ggtitle("Scree Plot: Pages x Words (Counts)") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+
+words_ca_scree_plot <- ggplot(words_ca_scree, aes(factor(comps), perc_explained)) +
+  geom_point() +
+  geom_path(aes(group = 1)) +
+  labs(x = "Components", y = "Explained Variance (%)") +
+  ggtitle("Scree Plot: Pages x Words (Binary)") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+  
+lemmas_counts_ca_scree_plot <- ggplot(lemmas_counts_ca_scree, aes(factor(comps), perc_explained)) +
+  geom_point() +
+  geom_path(aes(group = 1)) +
+  labs(x = "Components", y = "Explained Variance (%)") +
+  ggtitle("Scree Plot: Pages x Lemmas (Counts)") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+
+lemmas_ca_scree_plot <- ggplot(lemmas_ca_scree, aes(factor(comps), perc_explained)) +
+  geom_point() +
+  geom_path(aes(group = 1)) +
+  labs(x = "Components", y = "Explained Variance (%)") +
+  ggtitle("Scree Plot: Pages x Lemmas (Binary)") +
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+
+grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_scree_plot, lemmas_ca_scree_plot, nrow = 2)
 ```
+
 
 
 ```{r visualize_components}
