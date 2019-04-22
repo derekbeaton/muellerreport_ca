@@ -17,11 +17,14 @@ library(ours)
 
 library(ggplot2)
 library(gridExtra)
+library(ggrepel)
 ```
 
 # Background
 
-SOmething
+[Come back to this. So I think this should break into three analyses. This one is the first/primary:
+CAs of the frequencies per page. then the 0/1 and relate it to graphs, 
+then MCD (which connects back to bivariate & row/column flip)]
 
 # Explanation of the directory structure
 
@@ -47,10 +50,14 @@ page_by_lemma_counts.matrix_for_analyses <- read.csv(here::here("data","for_anal
 page_by_lemma.matrix_for_analyses <- read.csv(here::here("data","for_analyses","page_by_lemma.matrix_for_analyses.csv"), row.names = 1)
 
 words_counts_ca <- epCA(page_by_word_counts.matrix_for_analyses, graphs=F)
-words_ca <- epCA(page_by_word.matrix_for_analyses, graphs=F)
+# words_ca <- epCA(page_by_word.matrix_for_analyses, graphs=F)
+# words_gen.mcd <- cat.mcd(t(page_by_word.matrix_for_analyses), make.data.disjunctive = F, alpha = .75)
 
 lemmas_counts_ca <- epCA(page_by_lemma_counts.matrix_for_analyses, graphs=F)
-lemmas_ca <- epCA(page_by_lemma.matrix_for_analyses, graphs=F)
+# lemmas_ca <- epCA(page_by_lemma.matrix_for_analyses, graphs=F)
+# lemmas_gen.mcd <- cat.mcd(t(lemmas_ca), make.data.disjunctive = F, alpha = .75)
+
+
 
 ```
 
@@ -64,20 +71,20 @@ words_counts_ca_scree <- data.frame(eigs = words_counts_ca$ExPosition.Data$eigs,
                 comps = 1:length(words_counts_ca$ExPosition.Data$eigs)
                 )
 
-words_ca_scree <- data.frame(eigs = words_ca$ExPosition.Data$eigs,
-                perc_explained = words_ca$ExPosition.Data$t,
-                comps = 1:length(words_ca$ExPosition.Data$eigs)
-                )
+# words_ca_scree <- data.frame(eigs = words_ca$ExPosition.Data$eigs,
+#                 perc_explained = words_ca$ExPosition.Data$t,
+#                 comps = 1:length(words_ca$ExPosition.Data$eigs)
+#                 )
 
 lemmas_counts_ca_scree <- data.frame(eigs = lemmas_counts_ca$ExPosition.Data$eigs,
                 perc_explained = lemmas_counts_ca$ExPosition.Data$t,
                 comps = 1:length(lemmas_counts_ca$ExPosition.Data$eigs)
                 )
 
-lemmas_ca_scree <- data.frame(eigs = lemmas_ca$ExPosition.Data$eigs,
-                perc_explained = lemmas_ca$ExPosition.Data$t,
-                comps = 1:length(lemmas_ca$ExPosition.Data$eigs)
-                )
+# lemmas_ca_scree <- data.frame(eigs = lemmas_ca$ExPosition.Data$eigs,
+#                 perc_explained = lemmas_ca$ExPosition.Data$t,
+#                 comps = 1:length(lemmas_ca$ExPosition.Data$eigs)
+#                 )
 
 
 words_counts_ca_scree_plot <- ggplot(words_counts_ca_scree, aes(factor(comps), perc_explained)) +
@@ -87,12 +94,12 @@ words_counts_ca_scree_plot <- ggplot(words_counts_ca_scree, aes(factor(comps), p
   ggtitle("Scree Plot: Pages x Words (Counts)") +
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
 
-words_ca_scree_plot <- ggplot(words_ca_scree, aes(factor(comps), perc_explained)) +
-  geom_point() +
-  geom_path(aes(group = 1)) +
-  labs(x = "Components", y = "Explained Variance (%)") +
-  ggtitle("Scree Plot: Pages x Words (Binary)") +
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+# words_ca_scree_plot <- ggplot(words_ca_scree, aes(factor(comps), perc_explained)) +
+#   geom_point() +
+#   geom_path(aes(group = 1)) +
+#   labs(x = "Components", y = "Explained Variance (%)") +
+#   ggtitle("Scree Plot: Pages x Words (Binary)") +
+#   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
   
 lemmas_counts_ca_scree_plot <- ggplot(lemmas_counts_ca_scree, aes(factor(comps), perc_explained)) +
   geom_point() +
@@ -101,12 +108,12 @@ lemmas_counts_ca_scree_plot <- ggplot(lemmas_counts_ca_scree, aes(factor(comps),
   ggtitle("Scree Plot: Pages x Lemmas (Counts)") +
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
 
-lemmas_ca_scree_plot <- ggplot(lemmas_ca_scree, aes(factor(comps), perc_explained)) +
-  geom_point() +
-  geom_path(aes(group = 1)) +
-  labs(x = "Components", y = "Explained Variance (%)") +
-  ggtitle("Scree Plot: Pages x Lemmas (Binary)") +
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
+# lemmas_ca_scree_plot <- ggplot(lemmas_ca_scree, aes(factor(comps), perc_explained)) +
+#   geom_point() +
+#   geom_path(aes(group = 1)) +
+#   labs(x = "Components", y = "Explained Variance (%)") +
+#   ggtitle("Scree Plot: Pages x Lemmas (Binary)") +
+#   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
 
 grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_scree_plot, lemmas_ca_scree_plot, nrow = 2)
 ```
@@ -114,6 +121,81 @@ grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_s
 
 
 ```{r visualize_components}
+
+words_counts_ca_comps12_fi_df <- data.frame(
+  COMP1 = words_counts_ca$ExPosition.Data$fi[,1],
+  COMP2 = words_counts_ca$ExPosition.Data$fi[,2]
+)
+words_counts_ca_comps12_fj_df <- data.frame(  
+  COMP1 = words_counts_ca$ExPosition.Data$fj[,1],
+  COMP2 = words_counts_ca$ExPosition.Data$fj[,2]
+)
+words_counts_lims <- max(max(abs(words_counts_ca_comps12_fi_df)),max(abs(words_counts_ca_comps12_fj_df)))
+
+# words_ca_comps12_fi_df <- data.frame(
+#   COMP1 = words_ca$ExPosition.Data$fi[,1],
+#   COMP2 = words_ca$ExPosition.Data$fi[,2]
+#   )
+# words_ca_comps12_fj_df <- data.frame(  
+#   COMP1 = words_ca$ExPosition.Data$fj[,1],
+#   COMP2 = words_ca$ExPosition.Data$fj[,2]
+# )
+# words_lims <- max(max(abs(words_ca_comps12_fi_df)),max(abs(words_ca_comps12_fj_df)))
+
+lemmas_counts_ca_comps12_fi_df <- data.frame(
+  COMP1 = lemmas_counts_ca$ExPosition.Data$fi[,1],
+  COMP2 = lemmas_counts_ca$ExPosition.Data$fi[,2]
+)
+lemmas_counts_ca_comps12_fj_df <- data.frame(
+  COMP1 = lemmas_counts_ca$ExPosition.Data$fj[,1],
+  COMP2 = lemmas_counts_ca$ExPosition.Data$fj[,2]
+)
+lemmas_counts_lims <- max(max(abs(lemmas_counts_ca_comps12_fi_df)),max(abs(lemmas_counts_ca_comps12_fj_df)))
+
+# lemmas_ca_comps12_fi_df <- data.frame(
+#   COMP1 = lemmas_ca$ExPosition.Data$fi[,1],
+#   COMP2 = lemmas_ca$ExPosition.Data$fi[,2]
+# )
+# lemmas_ca_comps12_fj_df <- data.frame(
+#   COMP1 = lemmas_ca$ExPosition.Data$fj[,1],
+#   COMP2 = lemmas_ca$ExPosition.Data$fj[,2]
+# )
+# lemmas_lims <- max(max(abs(lemmas_ca_comps12_fi_df)),max(abs(lemmas_ca_comps12_fj_df)))
+
+ggplot(words_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fi_df))) +
+  geom_hline(yintercept = 0, color = "black") +
+  geom_vline(xintercept = 0, color="black") +
+  geom_point() +
+  # geom_text_repel(box.padding = .01, point.padding = .01) +
+  xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+  ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+  xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+  ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+  theme_bw() +
+  theme(axis.line = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank())
+
+
+ggplot(words_counts_ca_comps12_fj_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fj_df))) +
+  geom_hline(yintercept = 0, color = "black") +
+  geom_vline(xintercept = 0, color="black") +
+  geom_point() +
+  # geom_text_repel(box.padding = .01, point.padding = .01) +
+  xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+  ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+  xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+  ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+  theme_bw() +
+  theme(axis.line = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank())
 
 
 ```
