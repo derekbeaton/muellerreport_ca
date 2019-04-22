@@ -32,7 +32,7 @@ Correspondence analyses of the Mueller Report
     identical results for approximately the first 8 (possibly more)
     components
       - I did not expect this because the two data sets are different
-        (worsd are individual words, lemmas are particular words,
+        (words are individual words, lemmas are particular words,
         letters/keys, or phrases/n-grams)
   - The beginning and end pages of the Mueller Report are effectively
     orthogonal to one another, with highly specific words/lemmas for
@@ -59,12 +59,15 @@ matrices as `.csv` files.
 ## Analyses
 
 All analyses were performed here in `README.rmd`. I applied
-correspondence analysis (CA) to two versions of the data: \* pages x
-words: each cell contains the frequency of that word on that page (via
-[batpigandme/tidymueller](https://github.com/batpigandme/tidymueller))
-\* pages x lemmas: each cell contains the frequency of that lemma on
-that page (via
-[cbail/mueller\_report](https://github.com/cbail/mueller_report))
+correspondence analysis (CA) to two versions of the data:
+
+  - pages x words: each cell contains the frequency of that word on that
+    page (via
+    [batpigandme/tidymueller](https://github.com/batpigandme/tidymueller))
+
+  - pages x lemmas: each cell contains the frequency of that lemma on
+    that page (via
+    [cbail/mueller\_report](https://github.com/cbail/mueller_report))
 
 I used CA from one of my packages:
 [ExPosition](https://cran.r-project.org/web/packages/ExPosition/index.html).
@@ -73,11 +76,12 @@ for categorical, count, non-negative, and similar (i.e., χ2-friendly)
 data. When data are proportional, compositional, and generally
 χ2-friendly, PCA is not suitable. That’s because PCA wants to compute a
 covariance (or correlation) matrix from the data. In this case, the data
-should not (cannot\!) be normalized down the columns. CA provides a
-χ2-projection onto a Euclidean space. CA also has innumerable nearly
-magical properties (one of those magical properties is that if you have
-a network with a clique, CA produces eigenvalues of exactly 1 for every
-clique; that’s something for later…).
+should not (cannot\!) be normalized down the columns, so PCA is not
+appropriate. CA normalizes the data with respect to both the rows and
+columns, and provides a χ2-projection onto a Euclidean space. CA also
+has innumerable nearly magical properties (one of those magical
+properties is that if you have a network with a clique, CA produces
+eigenvalues of exactly 1 for every clique; that’s something for later…).
 
 Like PCA, CA produces orthogonal components that we rank order by their
 explained variance. So, the first component explains the most amount of
@@ -175,7 +179,7 @@ dropped because of excessively low frequency of words or lemmas.
 
 The `corrplot` above shows that the first 8 (possibly 11, or 13)
 components are virtually identical. I did not expect that\! It seems
-that for both of these preprocessing approaches, the low rank same
+that for both of these preprocessing approaches, the same low rank
 structure emerges. Between the first 8 components, the Rv-coefficient
 (akin to a multivariate R-squared) was 0.899.
 
