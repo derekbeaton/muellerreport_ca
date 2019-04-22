@@ -115,7 +115,8 @@ lemmas_counts_ca_scree_plot <- ggplot(lemmas_counts_ca_scree, aes(factor(comps),
 #   ggtitle("Scree Plot: Pages x Lemmas (Binary)") +
 #   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank())
 
-grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_scree_plot, lemmas_ca_scree_plot, nrow = 2)
+# grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_scree_plot, lemmas_ca_scree_plot, nrow = 2)
+grid.arrange(words_counts_ca_scree_plot, lemmas_counts_ca_scree_plot, nrow = 1)
 ```
 
 
@@ -124,13 +125,21 @@ grid.arrange(words_counts_ca_scree_plot, words_ca_scree_plot, lemmas_counts_ca_s
 
 words_counts_ca_comps12_fi_df <- data.frame(
   COMP1 = words_counts_ca$ExPosition.Data$fi[,1],
-  COMP2 = words_counts_ca$ExPosition.Data$fi[,2]
+  COMP2 = words_counts_ca$ExPosition.Data$fi[,2],
+  PAGE_NUMBER = as.numeric(rownames(words_counts_ca$ExPosition.Data$fi))
 )
 words_counts_ca_comps12_fj_df <- data.frame(  
   COMP1 = words_counts_ca$ExPosition.Data$fj[,1],
   COMP2 = words_counts_ca$ExPosition.Data$fj[,2]
 )
-words_counts_lims <- max(max(abs(words_counts_ca_comps12_fi_df)),max(abs(words_counts_ca_comps12_fj_df)))
+words_counts_xlims <- c(
+  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP1)),
+  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP1))
+)
+words_counts_ylims <- c(
+  min(c(0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP2)),
+  max(c(-0.01,words_counts_ca_comps12_fi_df$COMP1,words_counts_ca_comps12_fi_df$COMP2))
+)
 
 # words_ca_comps12_fi_df <- data.frame(
 #   COMP1 = words_ca$ExPosition.Data$fi[,1],
@@ -162,42 +171,115 @@ lemmas_counts_lims <- max(max(abs(lemmas_counts_ca_comps12_fi_df)),max(abs(lemma
 # )
 # lemmas_lims <- max(max(abs(lemmas_ca_comps12_fi_df)),max(abs(lemmas_ca_comps12_fj_df)))
 
-ggplot(words_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fi_df))) +
+
+## I should color this by a gradient...
+# words_counts.pages_component_map <- ggplot(words_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fi_df))) +
+#   geom_hline(yintercept = 0, color = "black") +
+#   geom_vline(xintercept = 0, color="black") +
+#   geom_point(color="black",fill="mediumorchid4", alpha=.7, shape=21) +
+#   geom_text(aes(label=rownames(words_counts_ca_comps12_fi_df)),hjust=0, vjust=0, color="mediumorchid4",alpha=.7) +
+#   # geom_text_repel(box.padding = .01, point.padding = .01) +
+#   xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+#   ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
+#   xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+#   ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+#   ggtitle("Pages x Words. Component Map of Pages.") +
+#   theme(axis.line = element_blank(),
+#     panel.border = element_blank(),
+#     axis.text.x = element_blank(),
+#     axis.text.y = element_blank(),
+#     axis.ticks = element_blank(), 
+#     panel.grid.major = element_blank(), 
+#     panel.grid.minor = element_blank(), 
+#     panel.background = element_blank())
+
+
+words_counts.pages_component_map <- 
+  ggplot(words_counts_ca_comps12_fi_df, aes(COMP1, COMP2, color=PAGE_NUMBER)) +
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color="black") +
   geom_point() +
+  scale_color_gradient(low="blue", high="red") +
+  # geom_text(aes(label=rownames(words_counts_ca_comps12_fi_df)),hjust=0, vjust=0, color="mediumorchid4",alpha=.7) +
+  # geom_text_repel(box.padding = .01, point.padding = .01) +
+  xlim(words_counts_xlims[1] * 1.1, words_counts_xlims[2] * 1.1) +
+  ylim(words_counts_ylims[1] * 1.1, words_counts_ylims[2] * 1.1) +
+  xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+  ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+  ggtitle("Pages x Words. Component Map of Pages.") +
+  theme(axis.line = element_blank(),
+    panel.border = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(), 
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank())
+
+
+words_counts.words_component_map <- ggplot(words_counts_ca_comps12_fj_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fj_df))) +
+  geom_hline(yintercept = 0, color = "black") +
+  geom_vline(xintercept = 0, color="black") +
+  geom_point(color="black",fill="olivedrab3", alpha=.7, shape=21) +
   # geom_text_repel(box.padding = .01, point.padding = .01) +
   xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
   ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
   xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
   ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
-  theme_bw() +
+  ggtitle("Pages x Words. Component Map of Words.") +
   theme(axis.line = element_blank(),
     panel.border = element_blank(),
-    panel.background = element_blank(),
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks = element_blank())
+    axis.ticks = element_blank(), 
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank())
 
 
-ggplot(words_counts_ca_comps12_fj_df, aes(COMP1, COMP2, label=rownames(words_counts_ca_comps12_fj_df))) +
+lemmas_counts.pages_component_map <- ggplot(lemmas_counts_ca_comps12_fi_df, aes(COMP1, COMP2, label=rownames(lemmas_counts_ca_comps12_fi_df))) +
   geom_hline(yintercept = 0, color = "black") +
   geom_vline(xintercept = 0, color="black") +
-  geom_point() +
+  geom_point(color="mediumorchid4") +
   # geom_text_repel(box.padding = .01, point.padding = .01) +
-  xlim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
-  ylim(-words_counts_lims * 1.1, words_counts_lims * 1.1) +
-  xlab(paste0("Component 1. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
-  ylab(paste0("Component 2. Explained Variance: ", round(words_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
-  theme_bw() +
+  xlim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  ylim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  xlab(paste0("Component 1. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+  ylab(paste0("Component 2. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+  ggtitle("Pages x Lemmas. Component Map of Pages") +
   theme(axis.line = element_blank(),
     panel.border = element_blank(),
-    panel.background = element_blank(),
     axis.text.x = element_blank(),
     axis.text.y = element_blank(),
-    axis.ticks = element_blank())
+    axis.ticks = element_blank(), 
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank())
 
 
+lemmas_counts.lemmas_component_map <- ggplot(lemmas_counts_ca_comps12_fj_df, aes(COMP1, COMP2, label=rownames(lemmas_counts_ca_comps12_fj_df))) +
+  geom_hline(yintercept = 0, color = "black") +
+  geom_vline(xintercept = 0, color="black") +
+  geom_point(color="olivedrab3") +
+  # geom_text_repel(box.padding = .01, point.padding = .01) +
+  xlim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  ylim(-lemmas_counts_lims * 1.1, lemmas_counts_lims * 1.1) +
+  xlab(paste0("Component 1. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[1],digits=2), "%" ) ) +
+  ylab(paste0("Component 2. Explained Variance: ", round(lemmas_counts_ca$ExPosition.Data$t[2],digits=2), "%" ) ) +
+  ggtitle("Pages x Lemmas Component Map of Lemmas.") +
+  theme(axis.line = element_blank(),
+    panel.border = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(), 
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(), 
+    panel.background = element_blank())
+
+
+grid.arrange(words_counts.pages_component_map, words_counts.words_component_map,
+             lemmas_counts.pages_component_map, lemmas_counts.lemmas_component_map,
+             nrow=2)
 ```
 
 
